@@ -9,6 +9,13 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
+
+st.set_page_config(
+        page_title="Gemini 2.0 Flash Chatbot",
+        page_icon="🤖",
+        layout="wide"
+    )
+
 # Retrieve API key for Google GenAI from the environment variables
 # or prompt the user to enter it if not available
 if "GOOGLE_API_KEY" not in st.session_state:
@@ -94,84 +101,62 @@ def process_uploaded_files():
     pdf_files = st.session_state.get("pdf_files", [])
     if pdf_files:
         for pdf_file in pdf_files:
-            # Save file info for later use in generation
             file_info = {
                 "name": pdf_file.name,
                 "type": "pdf",
                 "data": pdf_file.getvalue()
             }
             
-            # Add to uploaded files list for the session
             st.session_state.uploaded_files.append(file_info)
             st.session_state.last_uploaded = file_info
             
-            # Add a message to the chat history
             st.session_state.chat_history.append({
                 "role": "user",
                 "content": f"📄 Document uploaded: {pdf_file.name}",
                 "file_ref": file_info
             })
-        
-        # Clear the uploader state
-        st.session_state.pdf_files = []
     
     # Handle image uploads
     image_files = st.session_state.get("image_files", [])
     if image_files:
         for img_file in image_files:
-            # Process the image
             image = Image.open(img_file).convert("RGB")
             image = preprocess_image(image)
             
-            # Save the image bytes
             img_byte_arr = io.BytesIO()
             image.save(img_byte_arr, format='JPEG')
             
-            # Create file info
             file_info = {
                 "name": img_file.name,
                 "type": "image",
                 "data": img_byte_arr.getvalue()
             }
             
-            # Add to uploaded files list
             st.session_state.uploaded_files.append(file_info)
             st.session_state.last_uploaded = file_info
             
-            # Add a message with image HTML to the chat history
             img_html = get_image_html(image)
             st.session_state.chat_history.append({
                 "role": "user",
                 "content": f"🖼️ Image uploaded: {img_file.name}<br>{img_html}",
                 "file_ref": file_info
             })
-        
-        # Clear the uploader state
-        if 'processed_image_files' not in st.session_state:
-            st.session_state.processed_image_files = True
-        else:
-            # Set a flag to indicate all files have been processed
-            st.session_state.files_processed = True
     
     # Handle audio uploads
     audio_files = st.session_state.get("audio_files", [])
     if audio_files:
         for audio_file in audio_files:
-            # Get audio bytes
             audio_bytes = audio_file.getvalue()
             
-            # Create file info
             file_info = {
                 "name": audio_file.name,
                 "type": "audio",
                 "data": audio_bytes
             }
             
-            # Add to uploaded files list
             st.session_state.uploaded_files.append(file_info)
             st.session_state.last_uploaded = file_info
             
-            # Add a message with audio HTML to the chat history
             audio_html = get_audio_html(audio_bytes)
             st.session_state.chat_history.append({
                 "role": "user",
@@ -390,14 +375,9 @@ def run_code_execution(code_prompt):
         message_placeholder.markdown(error_message)
 
 def main():
-    st.set_page_config(
-        page_title="Gemini 2.0 Pro Chatbot",
-        page_icon="🤖",
-        layout="wide"
-    )
     
-    st.title("Gemini 2.0 Pro Multi-modal Chatbot")
-    st.caption(f"Version {VERSION} - Powered by Google's Gemini 2.0 Flash model")
+    st.title("Gemini 2.0 Flash Multi-modal Chatbot")
+    #st.caption(f"Version {VERSION} - Powered by Google's Gemini 2.0 Flash model")
     
     # Sidebar with controls
     with st.sidebar:
@@ -434,7 +414,7 @@ def main():
         if st.button("Submit Uploads", key="submit_uploads"):
             process_uploaded_files()
             st.success("Files uploaded successfully!")
-            st.rerun()  # Rerun to update the UI
+            st.experimental_rerun()  # Rerun to update the UI
         
         # Add a clear button
         if st.button("Clear Chat", key="clear_chat"):
@@ -448,7 +428,7 @@ def main():
             st.markdown(message["content"], unsafe_allow_html=True)
     
     # Chat input
-    tab1, tab2 = st.tabs(["Chat", "Code Execution"])
+    tab1, tab2 = st.tabs(["Chat",'Code'])
     
     with tab1:
         # Regular chat interface
