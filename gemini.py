@@ -414,7 +414,7 @@ def main():
         if st.button("Submit Uploads", key="submit_uploads"):
             process_uploaded_files()
             st.success("Files uploaded successfully!")
-            st.experimental_rerun()  # Rerun to update the UI
+            st.rerun()  # Rerun to update the UI
         
         # Add a clear button
         if st.button("Clear Chat", key="clear_chat"):
